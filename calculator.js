@@ -210,7 +210,9 @@ function calculate(d) {
   const effectiveDays = Math.max(52 * d.workDaysPerWeek - d.annualLeave - d.publicHolidays - d.sickLeave * 0.5, 50);
   const wfhRatio = Math.min(d.wfhDays / d.workDaysPerWeek, 1);
   const effectiveCommute = (d.commuteMinutes / 60) * (1 - wfhRatio);
-  const totalHoursPerDay = d.workHoursPerDay + effectiveCommute * 2;
+  const slackHours = d.slackHours || 0;  // 每日平均摸鱼时间
+  const actualWorkHours = Math.max(d.workHoursPerDay - slackHours, 1);
+  const totalHoursPerDay = actualWorkHours + effectiveCommute * 2;
   const effectiveHourlyRate = (yearlyIncome / effectiveDays) / totalHoursPerDay;
 
   // C. 基础分（期望时薪 = 行业基准 × 学历 × 工龄 × 岗位倍率 × 城市系数）
@@ -249,10 +251,13 @@ function calculate(d) {
   const diagnosis = buildDiag({ finalScore, baseScore, stabilityC, atmosphereC, freedomC, commuteC,
     effectiveHourlyRate, expectedRate, totalHoursPerDay, yearlyIncome, effectiveDays });
 
-  // 显示分数（压缩到 0-100 制，100 = 远超期望极値）
-  const displayScore = Math.min(100, Math.round(
-    finalScore <= 100 ? finalScore * 0.8 : 80 + (finalScore - 100) * 0.4
-  ));
+  // 显示分数（压缩到 0-100 制）
+  // 使用对数压缩：rawScore=50→display≈40, 80→60, 100→72, 130→84, 200→100
+  const displayScore = Math.min(100, Math.max(0, Math.round(
+    rawScore <= 0 ? 0 :
+    rawScore <= 200 ? 100 * Math.log(1 + rawScore) / Math.log(201) :
+    100
+  )));
 
   return {
     finalScore, displayScore, beat, percentile,

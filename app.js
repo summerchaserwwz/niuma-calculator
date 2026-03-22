@@ -6,7 +6,7 @@ let lastResult = null;
 const D = {
   preTaxSalary: 20000, ssRate: 0.14, ssBase: null,
   bonusMonths: 2, monthlySubsidy: 0,
-  workDaysPerWeek: 5, workHoursPerDay: 9, commuteMinutes: 40,
+  workDaysPerWeek: 5, workHoursPerDay: 9, slackHours: 0, commuteMinutes: 40,
   wfhDays: 0, annualLeave: 10, publicHolidays: 11, sickLeave: 5,
   companyType: 'medium', overtimeLevel: 'light',
   leaderScore: 3, colleagueScore: 3,
@@ -184,6 +184,10 @@ function drawS2() {
     <div class="iu"><input class="fi" id="f-wh" type="number" value="${D.workHoursPerDay}" min="4" max="20" step="0.5"><span class="unit">小时</span></div>
   </div>
   <div class="fg">
+    <div class="lbl">每日平均摸鱼时间 <span class="lbl-note">实际并未在工作的时间</span></div>
+    <div class="iu"><input class="fi" id="f-slack" type="number" value="${D.slackHours}" min="0" max="8" step="0.5"><span class="unit">小时</span></div>
+  </div>
+  <div class="fg">
     <div class="lbl">单程通勤 <span class="lbl-note">从家门到工位</span></div>
     <div class="iu"><input class="fi" id="f-cm" type="number" value="${D.commuteMinutes}" min="0" max="180" step="5"><span class="unit">分钟</span></div>
   </div>
@@ -226,6 +230,7 @@ function selOT(k) {
 function saveS2() {
   D.workDaysPerWeek = +document.getElementById('f-wd').value;
   D.workHoursPerDay = +document.getElementById('f-wh').value;
+  D.slackHours      = +document.getElementById('f-slack').value || 0;
   D.commuteMinutes  = +document.getElementById('f-cm').value;
   D.wfhDays         = +document.getElementById('f-wfh').value;
   D.annualLeave     = +document.getElementById('f-al').value;
