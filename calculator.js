@@ -68,8 +68,11 @@ const EDU_FACTOR = {
   bachelor:      { f: 0.78, label: '双非本科' },
   uni211:        { f: 0.90, label: '211本科' },
   b985_or_mbd:   { f: 1.05, label: '985本科 / 双非硕士' },
+  overseas_ms:   { f: 1.10, label: '海外硕士（普通院校）' },
   master985:     { f: 1.25, label: '985硕士（普通985）' },
+  qs100_ms:      { f: 1.35, label: '海外硕士（QS前100）' },
   top985master:  { f: 1.50, label: '顶尖985硕（清北/复浙交等top10）' },
+  top50_ms:      { f: 1.55, label: '海外硕士（QS前50 / 藤校等）' },
   phd:           { f: 1.60, label: '博士研究生' },
   topphd:        { f: 1.80, label: '顶尖博士（清北+/海外top50）' },
 };
@@ -258,10 +261,19 @@ function calculate(d) {
     effectiveHourlyRate, expectedRate, totalHoursPerDay, yearlyIncome, effectiveDays });
 
   // 显示分数（压缩到 0-100 制）
-  // 使用对数压缩：rawScore=50→display≈40, 80→60, 100→72, 130→84, 200→100
+  // 分段线性映射，与诊断阈值完全对齐：
+  // rawScore 0-50  → display 0-48  (“亠需改变”)
+  // rawScore 50-75 → display 48-60 (“性价比偏低”)
+  // rawScore 75-100→ display 60-75 (“尚可接受”)
+  // rawScore 100-130→display 75-88 (“挚值的”)
+  // rawScore 130-200→display 88-100(“远超所值”)
   const displayScore = Math.min(100, Math.max(0, Math.round(
-    rawScore <= 0 ? 0 :
-    rawScore <= 200 ? 100 * Math.log(1 + rawScore) / Math.log(201) :
+    rawScore <= 0   ? 0 :
+    rawScore <= 50  ? rawScore * 48 / 50 :
+    rawScore <= 75  ? 48 + (rawScore - 50) * 12 / 25 :
+    rawScore <= 100 ? 60 + (rawScore - 75) * 15 / 25 :
+    rawScore <= 130 ? 75 + (rawScore - 100) * 13 / 30 :
+    rawScore <= 200 ? 88 + (rawScore - 130) * 12 / 70 :
     100
   )));
 
