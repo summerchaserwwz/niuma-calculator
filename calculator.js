@@ -256,16 +256,12 @@ function calculate(d) {
   const percentile = normalCDF(finalScore, ind.mean, ind.std);
   const beat = Math.min(Math.round(percentile * 100), 99);
 
-  // G. 诊断
-  const diagnosis = buildDiag({ finalScore, baseScore, stabilityC, atmosphereC, freedomC, commuteC, growthC, pressureC,
-    effectiveHourlyRate, expectedRate, totalHoursPerDay, yearlyIncome, effectiveDays });
-
   // 显示分数（压缩到 0-100 制）
   // 分段线性映射，与诊断阈值完全对齐：
-  // rawScore 0-50  → display 0-48  (“亠需改变”)
+  // rawScore 0-50  → display 0-48  (“亟需改变”)
   // rawScore 50-75 → display 48-60 (“性价比偏低”)
   // rawScore 75-100→ display 60-75 (“尚可接受”)
-  // rawScore 100-130→display 75-88 (“挚值的”)
+  // rawScore 100-130→display 75-88 (“挺值的”)
   // rawScore 130-200→display 88-100(“远超所值”)
   const displayScore = Math.min(100, Math.max(0, Math.round(
     rawScore <= 0   ? 0 :
@@ -276,6 +272,10 @@ function calculate(d) {
     rawScore <= 200 ? 88 + (rawScore - 130) * 12 / 70 :
     100
   )));
+
+  // G. 诊断
+  const diagnosis = buildDiag({ finalScore, displayScore, baseScore, stabilityC, atmosphereC, freedomC, commuteC, growthC, pressureC,
+    effectiveHourlyRate, expectedRate, totalHoursPerDay, yearlyIncome, effectiveDays });
 
   return {
     finalScore, displayScore, beat, percentile,
@@ -291,7 +291,7 @@ function calculate(d) {
   };
 }
 
-function buildDiag({ finalScore, baseScore, stabilityC, atmosphereC, freedomC, commuteC, growthC, pressureC,
+function buildDiag({ finalScore, displayScore, baseScore, stabilityC, atmosphereC, freedomC, commuteC, growthC, pressureC,
     effectiveHourlyRate, expectedRate, totalHoursPerDay, yearlyIncome, effectiveDays }) {
   const items = [];
   const r = effectiveHourlyRate / expectedRate;
@@ -325,12 +325,14 @@ function buildDiag({ finalScore, baseScore, stabilityC, atmosphereC, freedomC, c
   else if (pressureC <= 0.82) items.push({ icon:'😰', level:'bad',  label:'压力持续偏大', tip:'身体疲惫感明显，心情不悦，长期消耗中' });
   else                        items.push({ icon:'⚡', level:'mid',  label:'压力阶段性波动', tip:'偶有高压期但在可承受范围' });
 
-  const v = finalScore >= 130 ? { icon:'🚀', l:'综合来看：远超所值', t:'当前岗位是高性价比机会，值得珍惜' }
-        : finalScore >= 100 ? { icon:'✅', l:'综合来看：挺值的',    t:'各维度综合评估达到期望' }
-        : finalScore >= 75  ? { icon:'🤔', l:'综合来看：尚可接受',  t:'略低于理想值，可继续观望' }
-        : finalScore >= 50  ? { icon:'⚠️', l:'综合来看：性价比偏低',t:'多个维度有明显短板，建议认真评估' }
-        :                     { icon:'💔', l:'综合来看：亟需改变',  t:'性价比严重偏低，每天都在消耗时间和健康' };
-  items.push({ icon: v.icon, level: finalScore >= 100 ? 'good' : finalScore >= 75 ? 'mid' : 'bad', label: v.l, tip: v.t });
+  const ds = displayScore;
+  const v = ds >= 88 ? { icon:'🚀', l:'综合来看：远超所值', t:'全面优秀，性价比极高，稳住别动' }
+          : ds >= 75 ? { icon:'✅', l:'综合来看：优质好工', t:'各维度综合评估达到期望，超过多数同行' }
+          : ds >= 60 ? { icon:'😐', l:'综合来看：标准水平', t:'不亏不赚，工作还行但也没啥惊喜' }
+          : ds >= 48 ? { icon:'🤔', l:'综合来看：有些吃亏', t:'拿走的比给你的多，建议继续观望或沟通' }
+          : ds >= 35 ? { icon:'⚠️', l:'综合来看：性价比低', t:'多个维度强烈拖后腿，每天都在消耗' }
+          :            { icon:'💔', l:'综合来看：亟需跑路', t:'极品配置，要么快跑要么快涨，不然卷死老板' };
+  items.push({ icon: v.icon, level: ds >= 75 ? 'good' : ds >= 48 ? 'mid' : 'bad', label: v.l, tip: v.t });
   return items;
 }
 
