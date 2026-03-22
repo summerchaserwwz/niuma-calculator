@@ -60,14 +60,14 @@ const INDUSTRY_BENCH = {
 
 // 学历期望系数（8档，区分院校背景）
 const EDU_FACTOR = {
-  junior:        { f: 0.75, label: '专科/高职' },
-  bachelor:      { f: 0.88, label: '双非本科' },
-  uni211:        { f: 0.96, label: '211本科' },
-  b985_or_mbd:   { f: 1.05, label: '985本科 / 双非硕士' },  // 985本科含金量≈普通硕士
-  master985:     { f: 1.18, label: '985硕士（普通985）' },
-  top985master:  { f: 1.30, label: '顶尖985硕（清北/复浙交等top10）' },
-  phd:           { f: 1.38, label: '博士研究生' },
-  topphd:        { f: 1.48, label: '顶尖博士（清北+/海外top50）' },
+  junior:        { f: 0.60, label: '专科/高职' },
+  bachelor:      { f: 0.78, label: '双非本科' },
+  uni211:        { f: 0.90, label: '211本科' },
+  b985_or_mbd:   { f: 1.05, label: '985本科 / 双非硕士' },
+  master985:     { f: 1.25, label: '985硕士（普通985）' },
+  top985master:  { f: 1.50, label: '顶尖985硕（清北/复浙交等top10）' },
+  phd:           { f: 1.60, label: '博士研究生' },
+  topphd:        { f: 1.80, label: '顶尖博士（清北+/海外top50）' },
 };
 
 // 城市生活成本系数（影响期望薪资基准，参考各城市20242025GDP与薪资报告）
