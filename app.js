@@ -510,7 +510,7 @@ function renderResult() {
 </div>`;
 
   requestAnimationFrame(() => {
-    animScore(r.finalScore, lv.color);
+    animScore(r.displayScore, lv.color);
     animBeat(r.beat);
     animRadar(radar);
     animPin(lv.pct);
@@ -626,8 +626,8 @@ function animScore(target, color) {
     // 底圈
     ctx.beginPath(); ctx.arc(cx, cy, rad, 0, Math.PI*2);
     ctx.strokeStyle = 'rgba(255,255,255,.07)'; ctx.lineWidth = 10; ctx.stroke();
-    // 彩色弧（上限150分=满圆）
-    const maxScore = 150;
+    // 彩色弧（上限100分=满圆）
+    const maxScore = 100;
     const ang = (Math.min(cur, maxScore) / maxScore) * Math.PI * 2 - Math.PI / 2;
     const g = ctx.createLinearGradient(cx - rad, 0, cx + rad, 0);
     g.addColorStop(0, '#0A84FF'); g.addColorStop(1, color);
@@ -684,7 +684,7 @@ function drawCurve(score, params) {
   ctx.strokeStyle='#0A84FF';ctx.lineWidth=2;ctx.setLineDash([4,3]);ctx.stroke();ctx.setLineDash([]);
   ctx.fillStyle='#0A84FF';ctx.font='600 11px -apple-system,sans-serif';
   ctx.textAlign=spx>W*.7?'right':'left';
-  ctx.fillText(`你 ${score}分`,spx+(spx>W*.7?-6:6),myY-4);
+  ctx.fillText('我在此',spx+(spx>W*.7?-6:6),myY-4);
   ctx.fillStyle='rgba(255,255,255,.3)';ctx.font='10px sans-serif';ctx.textAlign='center';
   [lo+(hi-lo)*.1,mean,lo+(hi-lo)*.9].forEach(v=>{
     ctx.fillText(Math.round(v),Math.round(((v-lo)/(hi-lo))*W),H-2);
