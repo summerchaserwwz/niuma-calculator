@@ -112,7 +112,7 @@ const JOB_ROLES = {
     { k:'big4_b',     label:'四大中后台',          mult:0.65 },
   ],
   medical: [
-    { k:'med_ai',    label:'医疗AI/影像算法',      mult:2.1 },
+    { k:'med_ai',    label:'医疗AI/影像算法',      mult:3.0 },
     { k:'doctor_sr', label:'医生（主治/主任级）', mult:2.5 },
     { k:'pharma_rd', label:'医药研发（硕博）',   mult:1.9 },
     { k:'meddev_rd', label:'医疗器械研发工程师',  mult:1.6 },
