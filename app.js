@@ -448,18 +448,23 @@ function renderResult() {
 
 <div class="score-bar-wrap">
   <div class="score-bar-track">
-    <div class="score-bar-seg" style="flex:16;background:rgba(255,69,58,.5)" title="<50 亟需改变"></div>
-    <div class="score-bar-seg" style="flex:20;background:rgba(255,107,53,.55)" title="50-70 明显偏低"></div>
-    <div class="score-bar-seg" style="flex:20;background:rgba(255,159,10,.6)" title="70-90 略低期望"></div>
-    <div class="score-bar-seg" style="flex:20;background:rgba(10,132,255,.65)" title="90-110 符合期望"></div>
-    <div class="score-bar-seg" style="flex:20;background:rgba(48,209,88,.65)" title="110-130 超出期望"></div>
-    <div class="score-bar-seg" style="flex:14;background:rgba(99,102,241,.75)" title=">130 远超所值"></div>
+    <div class="score-bar-seg" style="flex:16;background:rgba(255,69,58,.5)" title="<35 极品牛马"></div>
+    <div class="score-bar-seg" style="flex:16;background:rgba(255,107,53,.55)" title="35-48 被榨的牛马"></div>
+    <div class="score-bar-seg" style="flex:18;background:rgba(255,159,10,.6)" title="48-60 吃亏的牛马"></div>
+    <div class="score-bar-seg" style="flex:20;background:rgba(10,132,255,.65)" title="60-75 标准牛马"></div>
+    <div class="score-bar-seg" style="flex:19;background:rgba(48,209,88,.65)" title="75-88 优质打工人"></div>
+    <div class="score-bar-seg" style="flex:11;background:rgba(99,102,241,.75)" title=">88 牛马界顶流"></div>
     <div class="score-bar-pin" id="sbar-pin" style="left:${lv.pct}%">
       <div class="sbar-dot" style="background:${lv.color}"></div>
     </div>
   </div>
-  <div class="score-bar-labels">
-    <span>50</span><span>70</span><span>90</span><span>110</span><span>130</span>
+  <div class="score-bar-labels" style="justify-content: space-between; padding: 0 5%; font-size: 11px;">
+    <span style="flex:16;text-align:right">35</span>
+    <span style="flex:16;text-align:right">48</span>
+    <span style="flex:18;text-align:right">60</span>
+    <span style="flex:20;text-align:right">75</span>
+    <span style="flex:19;text-align:right">88</span>
+    <span style="flex:11"></span>
   </div>
 </div>
 
