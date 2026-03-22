@@ -693,8 +693,7 @@ function drawCurve(score, params) {
 
 // ---- 分享链接 ----
 function copyLink() {
-  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(D))));
-  const url = `${location.origin}${location.pathname}#s=${encoded}`;
+  const url = `${location.origin}${location.pathname}`;
   navigator.clipboard?.writeText(url)
     .then(()=>toast('✅ 链接已复制，分享给朋友一起测！'))
     .catch(()=>prompt('复制此链接：', url));
@@ -739,7 +738,7 @@ async function genCard() {
   ctx.beginPath(); ctx.moveTo(80, 95); ctx.lineTo(W-80, 95); ctx.stroke();
 
   // —— 大分数环（Canvas） ——
-  const scoreR = 110, scx = W/2, scy = 230;
+  const scoreR = 120, scx = W/2, scy = 250;
   // 底环
   ctx.beginPath(); ctx.arc(scx, scy, scoreR, 0, Math.PI*2);
   ctx.strokeStyle = 'rgba(255,255,255,.07)'; ctx.lineWidth = 14; ctx.stroke();
@@ -753,13 +752,13 @@ async function genCard() {
   // 分数数字
   ctx.font = '900 96px -apple-system,sans-serif';
   ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
-  ctx.fillText(Math.round(r.finalScore), scx, scy + 30);
+  ctx.fillText(Math.round(r.displayScore), scx, scy + 30);
   ctx.font = '400 22px -apple-system,sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,.35)';
   ctx.fillText('综合得分', scx, scy + 62);
 
   // —— 锐评徽章 ——
-  const badgeY = 390;
+  const badgeY = 410;
   const badgeTxt = lv.label;
   ctx.font = '700 34px -apple-system,sans-serif';
   const tw = ctx.measureText(badgeTxt).width;
@@ -771,15 +770,8 @@ async function genCard() {
   ctx.fillStyle = lv.color; ctx.textAlign = 'center';
   ctx.fillText(badgeTxt, W/2, badgeY + 45);
 
-  // 行业/岗位/城市标签
-  const tagY = 482;
-  const tags = [ind, jobR, city].filter(Boolean);
-  ctx.font = '500 26px -apple-system,sans-serif';
-  ctx.fillStyle = 'rgba(255,255,255,.45)';
-  ctx.fillText(tags.join('  ·  '), W/2, tagY);
-
-  // 打败多少人
-  const beatY = 538;
+  // —— 打败多少人 ——
+  const beatY = 580;
   ctx.font = '800 72px -apple-system,sans-serif';
   const beatG = ctx.createLinearGradient(W/2-220,0,W/2+220,0);
   beatG.addColorStop(0,'#0A84FF'); beatG.addColorStop(1,'#30D158');
@@ -787,10 +779,18 @@ async function genCard() {
   ctx.fillText(`打败 ${r.beat}% 打工人`, W/2, beatY);
   ctx.font = '400 22px -apple-system,sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,.28)';
-  ctx.fillText('* 行业统计分布模型估算，仅供参考', W/2, beatY + 38);
+  ctx.fillText('* 行业统计分布模型估算，仅供参考，不包含隐私数字', W/2, beatY + 38);
+
+  // —— 行业/岗位/城市标签 ——
+  const tagY = 680;
+  const tags = [ind, jobR, city].filter(Boolean);
+  ctx.font = '500 24px -apple-system,sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,.45)';
+  // 限制最大宽度，防止文本溢出
+  ctx.fillText(tags.join('  ·  '), W/2, tagY, 960);
 
   ctx.strokeStyle = 'rgba(255,255,255,.07)'; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(80, 600); ctx.lineTo(W-80, 600); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(80, 750); ctx.lineTo(W-80, 750); ctx.stroke();
 
   // —— 五维雷达图 ——
   const radar = [
@@ -800,7 +800,7 @@ async function genCard() {
     { label:'自由', v: radarVal(r.freedomC, 0.60, 1.28) },
     { label:'通勤', v: radarVal(r.commuteC, 0.68, 1.18) },
   ];
-  const RRR = 158, rcx = W/2, rcy = 830;
+  const RRR = 145, rcx = W/2, rcy = 930;
   const NN = radar.length;
   const rangs = radar.map((_, i) => -Math.PI/2 + (i * 2 * Math.PI / NN));
   // 网格
@@ -848,10 +848,10 @@ async function genCard() {
   });
 
   ctx.strokeStyle='rgba(255,255,255,.07)'; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(80,1050); ctx.lineTo(W-80,1050); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(80,1130); ctx.lineTo(W-80,1130); ctx.stroke();
 
   // —— 分析段落 ——
-  const analysisY = 1082;
+  const analysisY = 1170;
   ctx.font = '600 26px -apple-system,sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,.5)';
   ctx.textAlign = 'left';
@@ -873,11 +873,11 @@ async function genCard() {
       } else { l = test; }
     }
     if (l) { ctx.fillText(l, lx2, ty); ty += 44; }
-    if (ty > 1300) break; // 防溢出
+    if (ty > 1380) break; // 防溢出
   }
 
   // —— 行业分布曲线 ——
-  const curveY = 1330, curveH = 100, curveW = W - 160;
+  const curveY = 1410, curveH = 100, curveW = W - 160;
   ctx.font = '600 24px -apple-system,sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,.45)'; ctx.textAlign='left';
   ctx.fillText('📊 行业分布曲线', 80, curveY - 14);
