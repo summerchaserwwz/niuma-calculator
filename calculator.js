@@ -44,6 +44,10 @@ const OVERTIME = {
   heavy:   { coef: 0.78, label: '大量/大小周', desc: '大小周或月加班50h+，基本没有完整周末' },
   intense: { coef: 0.65, label: '严重内卷/996', desc: '996或更狠，身心透支风险极高' },
 };
+// 成长前景系数（主观打分0-5）
+const GROWTH_COEF = [0.70, 0.80, 0.90, 1.00, 1.10, 1.18];
+// 主观压力感受系数（0-5档）
+const PRESSURE_COEF = [0.88, 1.15, 1.00, 0.82, 0.65, 0.50];
 // 行业基准时薪（元/h，2024年中国含中小规模公司均值）
 const INDUSTRY_BENCH = {
   internet:    { rate: 90,  label: '互联网/科技',  mean: 82, std: 22 },  // 含中小厂均值下修
@@ -227,7 +231,7 @@ function calculate(d) {
   const expectedRate = bench * eduF * yrsF * jobMult * cityCoef;
   const baseScore = (effectiveHourlyRate / expectedRate) * 100;
 
-  // D. 五大系数
+  // D. 七大系数
   const stabilityC  = STABILITY[d.companyType]?.coef || 1.0;
   const leaderC     = LEADER_COEF[d.leaderScore]   || 1.0;
   const colleagueC  = COLLEAGUE_COEF[d.colleagueScore] || 1.0;
@@ -237,9 +241,11 @@ function calculate(d) {
   const freedomC    = overtimeC * (1 + wfhBonus);
   const effectiveMin= d.commuteMinutes * (1 - wfhRatio);
   const commuteC    = commuteCoef(effectiveMin);
+  const growthC     = GROWTH_COEF[d.growthScore ?? 3] || 1.0;
+  const pressureC   = PRESSURE_COEF[d.pressureLevel ?? 2] || 1.0;
 
   // E. 最终得分
-  const rawScore   = baseScore * stabilityC * atmosphereC * freedomC * commuteC;
+  const rawScore   = baseScore * stabilityC * atmosphereC * freedomC * commuteC * growthC * pressureC;
   const finalScore = Math.round(Math.min(Math.max(rawScore, 0), 200) * 10) / 10;
 
   // F. 百分位
@@ -248,7 +254,7 @@ function calculate(d) {
   const beat = Math.min(Math.round(percentile * 100), 99);
 
   // G. 诊断
-  const diagnosis = buildDiag({ finalScore, baseScore, stabilityC, atmosphereC, freedomC, commuteC,
+  const diagnosis = buildDiag({ finalScore, baseScore, stabilityC, atmosphereC, freedomC, commuteC, growthC, pressureC,
     effectiveHourlyRate, expectedRate, totalHoursPerDay, yearlyIncome, effectiveDays });
 
   // 显示分数（压缩到 0-100 制）
@@ -266,13 +272,14 @@ function calculate(d) {
     expectedRate: Math.round(expectedRate),
     dailyValue: Math.round(yearlyIncome / effectiveDays),
     effectiveDays: Math.round(effectiveDays),
+    growthC, pressureC,
     totalHoursPerDay: Math.round(totalHoursPerDay * 10) / 10,
     stabilityC, atmosphereC, freedomC, commuteC,
     diagnosis, distParams: { mean: ind.mean, std: ind.std },
   };
 }
 
-function buildDiag({ finalScore, baseScore, stabilityC, atmosphereC, freedomC, commuteC,
+function buildDiag({ finalScore, baseScore, stabilityC, atmosphereC, freedomC, commuteC, growthC, pressureC,
     effectiveHourlyRate, expectedRate, totalHoursPerDay, yearlyIncome, effectiveDays }) {
   const items = [];
   const r = effectiveHourlyRate / expectedRate;
@@ -297,6 +304,15 @@ function buildDiag({ finalScore, baseScore, stabilityC, atmosphereC, freedomC, c
   else if (commuteC < 0.84)   items.push({ icon:'🚇', level:'bad',  label:'通勤严重消耗人生', tip:'长通勤每年侵蚀数百小时' });
   else                        items.push({ icon:'🚌', level:'mid',  label:'通勤在可接受范围', tip:'通勤时间处于正常水平' });
 
+  if (growthC >= 1.10)        items.push({ icon:'🌱', level:'good', label:'成长空间充足', tip:'这份工作能让你持续增值，未来更值钱' });
+  else if (growthC <= 0.80)   items.push({ icon:'🪨', level:'bad',  label:'成长空间匮乏', tip:'学不到东西的工作就是纯消耗，越干越贬值' });
+  else                        items.push({ icon:'📘', level:'mid',  label:'成长空间一般', tip:'能学到一些，但不是特别多' });
+
+  if (pressureC >= 1.10)      items.push({ icon:'😌', level:'good', label:'工作状态舒适', tip:'压力可控，心情不错，可长期持续' });
+  else if (pressureC <= 0.65) items.push({ icon:'🫠', level:'bad',  label:'身心严重透支', tip:'长期高压已影响身心健康，要认真考虑退出' });
+  else if (pressureC <= 0.82) items.push({ icon:'😰', level:'bad',  label:'压力持续偏大', tip:'身体疲惫感明显，心情不悦，长期消耗中' });
+  else                        items.push({ icon:'⚡', level:'mid',  label:'压力阶段性波动', tip:'偶有高压期但在可承受范围' });
+
   const v = finalScore >= 130 ? { icon:'🚀', l:'综合来看：远超所值', t:'当前岗位是高性价比机会，值得珍惜' }
         : finalScore >= 100 ? { icon:'✅', l:'综合来看：挺值的',    t:'各维度综合评估达到期望' }
         : finalScore >= 75  ? { icon:'🤔', l:'综合来看：尚可接受',  t:'略低于理想值，可继续观望' }
@@ -306,4 +322,4 @@ function buildDiag({ finalScore, baseScore, stabilityC, atmosphereC, freedomC, c
   return items;
 }
 
-window.Calc = { calculate, calcAfterTax, STABILITY, OVERTIME, INDUSTRY_BENCH, EDU_FACTOR, LEADER_COEF, COLLEAGUE_COEF, JOB_ROLES, CITY_COST };
+window.Calc = { calculate, calcAfterTax, STABILITY, OVERTIME, INDUSTRY_BENCH, EDU_FACTOR, LEADER_COEF, COLLEAGUE_COEF, JOB_ROLES, CITY_COST, GROWTH_COEF, PRESSURE_COEF };

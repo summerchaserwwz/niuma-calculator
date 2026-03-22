@@ -10,6 +10,7 @@ const D = {
   wfhDays: 0, annualLeave: 10, publicHolidays: 11, sickLeave: 5,
   companyType: 'medium', overtimeLevel: 'light',
   leaderScore: 3, colleagueScore: 3,
+  growthScore: 3, pressureLevel: 2,
   education: 'bachelor', workYears: 3, industry: 'internet',
   cityTier: 's1',  // 默认超一线
   jobRole: '',
@@ -47,6 +48,22 @@ const COMPANY_OPTS = [
   { k:'medium',        emoji:'🏢', title:'普通中型公司',       desc:'几百人未上市私企，基准参照，风险适中' },
   { k:'small',         emoji:'🏠', title:'小公司',             desc:'200人以下，现金流和稳定性有一定风险' },
   { k:'startup',       emoji:'🚀', title:'初创/创业',          desc:'高风险高压，期权价值不确定，随时可能关张' },
+];
+const GROWTH_DESC = [
+  { n:'0', emoji:'🪨', title:'完全没成长',  desc:'重复性工作，学不到任何新东西，纯糊口工具人' },
+  { n:'1', emoji:'🐢', title:'很少成长',    desc:'偶尔能学一点，但整体没什么新东西，技能长期停滞' },
+  { n:'2', emoji:'📚', title:'一般成长',    desc:'能学到一些，但不是特别多，进步较慢' },
+  { n:'3', emoji:'📈', title:'正常成长',    desc:'能磨练技能，接触新东西，对职业有帮助' },
+  { n:'4', emoji:'🚀', title:'成长很快',    desc:'学到很多，视野在打开，能力明显提升' },
+  { n:'5', emoji:'🌟', title:'极速成长',    desc:'每天都在突破，项目/导师/平台都极好，未来可期' },
+];
+const PRESSURE_DESC = [
+  { n:'0', emoji:'😴', title:'极度清闲',    desc:'工作量极小，日常摸鱼，因太闲而无聊' },
+  { n:'1', emoji:'😌', title:'平衡舒适',    desc:'工作量适中可控，压力小，心情舒畅，可长期持续' },
+  { n:'2', emoji:'⚡', title:'阶段性忙碌',  desc:'偶有忙期但有明确周期，压力在可承受范围' },
+  { n:'3', emoji:'😰', title:'持续高压',    desc:'工作量长期偏大，加班频繁，身体疲惫，心情不悦' },
+  { n:'4', emoji:'🫠', title:'过载透支',    desc:'工作超出承受范围，压力大，情绪低落，生活被侵占' },
+  { n:'5', emoji:'💥', title:'危险崩溃',    desc:'无尽头加班+PUA，自我否定，强烈离职念头，职业倦怠' },
 ];
 
 // ---- 页面切换 ----
@@ -239,21 +256,28 @@ function saveS2() {
 }
 
 // ======== Step 3: 氛围 ========
-function scoreHTML(id, cur, items) {
-  return `<div class="score-cards" id="${id}">${items.map((it,i)=>`
-    <div class="score-card ${cur===i+1?'on':''}" onclick="setScore('${id}',${i+1})">
+function scoreHTML(id, cur, items, base=1) {
+  return `<div class="score-cards" id="${id}">${items.map((it,i)=>{
+    const val = base + i;
+    return `<div class="score-card ${cur===val?'on':''}" onclick="setScore('${id}',${val})">
       <div class="score-num-lbl">${it.emoji}</div>
       <div class="score-title">${it.title}</div>
       <div class="score-desc">${it.desc}</div>
-    </div>`).join('')}</div>`;
+    </div>`;
+  }).join('')}</div>`;
 }
 function setScore(id, v) {
   const key={
     'sg-ldr':'leaderScore',
     'sg-col':'colleagueScore',
+    'sg-growth':'growthScore',
+    'sg-pressure':'pressureLevel',
   }[id];
   if(key) D[key]=v;
-  document.querySelectorAll(`#${id} .score-card`).forEach((el,i)=>el.classList.toggle('on',i+1===v));
+  // update visual state
+  const cards = document.querySelectorAll(`#${id} .score-card`);
+  const base = (id === 'sg-growth' || id === 'sg-pressure') ? 0 : 1;
+  cards.forEach((el,i)=>el.classList.toggle('on', base+i===v));
 }
 function drawS3() {
   document.getElementById('s3').innerHTML = `
@@ -276,6 +300,15 @@ function drawS3() {
 <div class="fg">
   <div class="lbl">同事氛围 <span class="lbl-note">权重30%</span></div>
   ${scoreHTML('sg-col', D.colleagueScore, COLLEAGUE_DESC)}
+</div>
+<hr class="hr">
+<div class="fg" style="margin-bottom:20px">
+  <div class="lbl">🌱 成长前景 <span class="lbl-note">这份工作能让你学到东西吗？</span></div>
+  ${scoreHTML('sg-growth', D.growthScore, GROWTH_DESC, 0)}
+</div>
+<div class="fg">
+  <div class="lbl">💡 主观压力感受 <span class="lbl-note">你当前的整体工作状态</span></div>
+  ${scoreHTML('sg-pressure', D.pressureLevel, PRESSURE_DESC, 0)}
 </div>
 <div class="step-acts">
   <button class="btn btn-g" onclick="goTo(2)">← 上一步</button>
