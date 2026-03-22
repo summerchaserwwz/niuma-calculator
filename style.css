@@ -449,10 +449,11 @@ body {
   #app { padding: 12px 10px 60px }
 
   /* 卡片 */
-  .card { padding: 22px 16px; border-radius: 20px }
+  .card { padding: 20px 14px; border-radius: 20px }
 
   /* 首屏 */
-  #hero { padding: 36px 16px }
+  #hero { padding: 32px 14px }
+  .hero-title { font-size: 38px !important }
   .hero-icon { font-size: 56px }
   .badges { gap: 6px }
   .badge { font-size: 11px; padding: 4px 10px }
@@ -460,7 +461,7 @@ body {
   /* 主题切换按钮缩小 */
   .theme-btn { padding: 6px 11px; font-size: 12px; top: 10px; right: 10px }
 
-  /* 进度条标签隐藏在极小屏 */
+  /* 进度条 */
   .prog-lbl { display: none }
   .prog-steps { gap: 0 }
 
@@ -471,7 +472,7 @@ body {
   .step-acts { gap: 8px }
   .btn-lg { padding: 15px 24px; font-size: 16px }
 
-  /* 评分卡：5个并排→折行，每个最小宽70px */
+  /* 评分卡：折行 */
   .score-cards { flex-wrap: wrap }
   .score-card { min-width: calc(20% - 7px); flex: 1 1 70px }
   .score-num-lbl { font-size: 18px }
@@ -479,9 +480,7 @@ body {
   .score-desc { font-size: 9px }
 
   /* 社保设置：2列→1列 */
-  #s1 [style*="grid-template-columns:1fr 1fr"] {
-    grid-template-columns: 1fr !important;
-  }
+  .grid-2col { grid-template-columns: 1fr }
 
   /* 统计卡：3列→2列 */
   .stats { grid-template-columns: 1fr 1fr }
@@ -494,11 +493,31 @@ body {
   .res-acts { flex-direction: column }
   .res-acts .btn { width: 100%; justify-content: center }
 
-  /* 分数环缩小 */
-  .ring { width: 150px; height: 150px }
-  .score-display { font-size: 50px }
+  /* 结果页分数环区域——防止canvas溢出 */
+  .res-score-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+  }
+  .ring-lg { width: 160px !important; height: 160px !important; overflow: hidden }
+  .ring-lg canvas { width: 160px !important; height: 160px !important }
+  .ring-inner .score-num { font-size: 48px !important }
+
+  /* 雷达图容器宽度自适应 */
+  .radar-wrap { overflow: hidden; width: 100% }
+  .radar-wrap canvas { max-width: 100%; height: auto }
+
+  /* 进度条刻度字体 */
+  .score-bar-labels span { font-size: 10px }
+
+  /* 分数徽章 */
+  .score-badge { font-size: 14px; padding: 8px 18px }
+
+  /* beat pct */
   .beat-pct { font-size: 48px }
 }
+
 
 .hidden { display: none !important }
 /* 可折叠2列 grid，手机上自动折为1列 */

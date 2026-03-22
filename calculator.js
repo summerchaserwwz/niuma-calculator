@@ -70,12 +70,14 @@ const EDU_FACTOR = {
   topphd:        { f: 1.48, label: '顶尖博士（清北+/海外top50）' },
 };
 
-// 城市生活成本系数（影响期望薪资基准）
+// 城市生活成本系数（影响期望薪资基准，参考各城市20242025GDP与薪资报告）
 const CITY_COST = {
-  tier1:  { coef: 1.00, label: '一线城市（北上广深）' },
-  tier1b: { coef: 0.86, label: '新一线（杭州/成都/南京/武汉等）' },
-  tier2:  { coef: 0.74, label: '二线城市（省会/计划单列市）' },
-  tier3:  { coef: 0.63, label: '三线及以下城市' },
+  s1:    { coef: 1.00, label: '超一线（北京/上海/深圳）' },
+  tier1: { coef: 0.93, label: '一线（广州）' },
+  tier1b:{ coef: 0.85, label: '新一线（杭州/成都/南京等）' },
+  tier2s:{ coef: 0.76, label: '强二线（苏州/厉门/无锡/合肥/东莞等）' },
+  tier2: { coef: 0.67, label: '二线省会（沈阳/长沙/南昌等）' },
+  tier3: { coef: 0.58, label: '三线及以下城市' },
 };
 
 // 按行业分类的常见岗位（参考Boss直聘2024，mult为相对行业基准的倍率）
@@ -110,13 +112,15 @@ const JOB_ROLES = {
     { k:'big4_b',     label:'四大中后台',          mult:0.65 },
   ],
   medical: [
-    { k:'doctor_sr',  label:'医生（主治/主任级）', mult:2.5 },
-    { k:'pharma_rd',  label:'医药研发（硕博）',   mult:1.9 },
-    { k:'med_sales',  label:'医疗器械/医药销售',  mult:1.5 },
-    { k:'cra',        label:'临床研究员CRA',       mult:1.2 },
-    { k:'doctor_jr',  label:'住院医/规培医',       mult:0.85 },
-    { k:'nurse',      label:'护士/护师',           mult:0.75 },
-    { k:'hosp_admin', label:'医院行政',            mult:0.6 },
+    { k:'med_ai',    label:'医疗AI/影像算法',      mult:2.1 },
+    { k:'doctor_sr', label:'医生（主治/主任级）', mult:2.5 },
+    { k:'pharma_rd', label:'医药研发（硕博）',   mult:1.9 },
+    { k:'meddev_rd', label:'医疗器械研发工程师',  mult:1.6 },
+    { k:'med_sales', label:'医疗器械/医药销售',  mult:1.5 },
+    { k:'cra',       label:'临床研究员CRA',       mult:1.2 },
+    { k:'doctor_jr', label:'住院医/规培医',       mult:0.85 },
+    { k:'nurse',     label:'护士/护师',           mult:0.75 },
+    { k:'hosp_admin',label:'医院行政',            mult:0.6 },
   ],
   education: [
     { k:'prof',       label:'高校教授/副教授',    mult:2.2 },
@@ -245,8 +249,13 @@ function calculate(d) {
   const diagnosis = buildDiag({ finalScore, baseScore, stabilityC, atmosphereC, freedomC, commuteC,
     effectiveHourlyRate, expectedRate, totalHoursPerDay, yearlyIncome, effectiveDays });
 
+  // 显示分数（压缩到 0-100 制，100 = 远超期望极値）
+  const displayScore = Math.min(100, Math.round(
+    finalScore <= 100 ? finalScore * 0.8 : 80 + (finalScore - 100) * 0.4
+  ));
+
   return {
-    finalScore, beat, percentile,
+    finalScore, displayScore, beat, percentile,
     monthlyNet, yearlyIncome: Math.round(yearlyIncome),
     effectiveHourlyRate: Math.round(effectiveHourlyRate),
     expectedRate: Math.round(expectedRate),

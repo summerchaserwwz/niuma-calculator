@@ -11,8 +11,8 @@ const D = {
   companyType: 'medium', overtimeLevel: 'light',
   leaderScore: 3, colleagueScore: 3,
   education: 'bachelor', workYears: 3, industry: 'internet',
-  cityTier: 'tier1',  // 城市生活成本等级
-  jobRole: '',         // 岗位类别（不选则用行业均值）
+  cityTier: 's1',  // 默认超一线
+  jobRole: '',
 };
 
 // ---- 评分描述 ----
@@ -142,13 +142,13 @@ function drawS1() {
       <div class="fg">
         <div class="lbl" style="font-size:11px;font-weight:500">个人缴纳比例</div>
         <select class="fs" id="ss-rate-sel" onchange="onSsRateSel(this.value)">
-          <option value="14" ${D.ssRate==0.14?'selected':''}>约14%（多数城市）</option>
-          <option value="12" ${D.ssRate==0.12?'selected':''}>约12%（少缴公积金）</option>
-          <option value="10" ${D.ssRate==0.10?'selected':''}>约10%（不交公积金）</option>
-          <option value="7"  ${D.ssRate==0.07?'selected':''}>约7%（仅五险）</option>
-          <option value="5"  ${D.ssRate==0.05?'selected':''}>约5%（最低标准）</option>
-          <option value="0"  ${D.ssRate==0?'selected':''}>0（公司全担 / 已是纯税后）</option>
-          <option value="custom" ${![0,0.05,0.07,0.10,0.12,0.14].includes(D.ssRate)?'selected':''}>自定义比例</option>
+          <option value="0.14" ${D.ssRate===0.14?'selected':''}>14%</option>
+          <option value="0.12" ${D.ssRate===0.12?'selected':''}>12%</option>
+          <option value="0.10" ${D.ssRate===0.10?'selected':''}>10%</option>
+          <option value="0.07" ${D.ssRate===0.07?'selected':''}>7%</option>
+          <option value="0.05" ${D.ssRate===0.05?'selected':''}>5%</option>
+          <option value="0" ${D.ssRate===0?'selected':''}>0%</option>
+          <option value="custom">自定义%</option>
         </select>
         <div id="ss-rate-inp-wrap" style="display:${![0,0.05,0.07,0.10,0.12,0.14].includes(D.ssRate)?'block':'none'}">
           <div class="iu"><input class="fi" id="ss-rate-inp" type="number" value="${Math.round(D.ssRate*100)}"
@@ -364,50 +364,57 @@ function saveS4() {
 }
 
 // ======== 结果页 ========
-// ---- 分数档位（犀利锐评）----
+// ---- 分数档位（牛马主题锐评，基于 displayScore 0-100）----
 function scoreLevel(s) {
-  if (s >= 130) return { cls:'lvl-s', color:'#6366f1', bg:'rgba(99,102,241,.15)', label:'🚀 这工作配上你，是它的福气', pct: Math.min(100, ((s-130)/20)*12+89) };
-  if (s >= 110) return { cls:'lvl-a', color:'#30D158', bg:'rgba(48,209,88,.12)', label:'🎯 这碗饭还不错，先别乱跳',   pct: Math.min(89, 70+((s-110)/20)*19) };
-  if (s >=  90) return { cls:'lvl-b', color:'#0A84FF', bg:'rgba(10,132,255,.12)', label:'😑 就这？凑合配得上你',       pct: 50+((s-90)/20)*20 };
-  if (s >=  70) return { cls:'lvl-c', color:'#FF9F0A', bg:'rgba(255,159,10,.12)', label:'🤡 有点亏，但你可能不敢跳',  pct: 32+((s-70)/20)*18 };
-  if (s >=  50) return { cls:'lvl-d', color:'#FF6B35', bg:'rgba(255,107,53,.12)', label:'😮‍💨 在消耗你，认真考虑吧',   pct: 16+((s-50)/20)*16 };
-  return { cls:'lvl-e', color:'#FF453A', bg:'rgba(255,69,58,.12)', label:'⚰️ 你还在？主打一个钢铁意志',             pct: (s/50)*16 };
+  if (s >= 88) return { cls:'lvl-s', color:'#6366f1', bg:'rgba(99,102,241,.15)', label:'💰 牛马界顶流，不卷了',      pct: Math.min(100, 89+((s-88)/12)*11) };
+  if (s >= 75) return { cls:'lvl-a', color:'#30D158', bg:'rgba(48,209,88,.12)', label:'🎯 优质打工人，小日子还行',   pct: 70+((s-75)/13)*19 };
+  if (s >= 60) return { cls:'lvl-b', color:'#0A84FF', bg:'rgba(10,132,255,.12)', label:'😑 标准牛马，混着就行',       pct: 50+((s-60)/15)*20 };
+  if (s >= 48) return { cls:'lvl-c', color:'#FF9F0A', bg:'rgba(255,159,10,.12)', label:'🤡 吃亏的牛马，谁在创造价值', pct: 32+((s-48)/12)*18 };
+  if (s >= 35) return { cls:'lvl-d', color:'#FF6B35', bg:'rgba(255,107,53,.12)', label:'😮‍💨 被榨的牛马，认真想想退出', pct: 16+((s-35)/13)*16 };
+  return         { cls:'lvl-e', color:'#FF453A', bg:'rgba(255,69,58,.12)',  label:'⚰️ 极品牛马，甘蔗比你甜',       pct: (s/35)*16 };
 }
 
-// ---- 分析段落生成 ----
+// ---- 分析段落生成（有趣的牛马风格，不含行业名隐私）----
 function genAnalysis(r, d) {
-  const ind = C.INDUSTRY_BENCH[d.industry]?.label || '';
-  const co  = C.STABILITY[d.companyType]?.label || '';
-  const ot  = C.OVERTIME[d.overtimeLevel]?.label || '';
   const parts = [];
   const sr = r.effectiveHourlyRate / r.expectedRate;
-  if (sr >= 1.3)       parts.push(`薪资远超${ind}行业期望 ${Math.round((sr-1)*100)}%，薪酬是当前最大优势`);
-  else if (sr >= 1.05) parts.push(`薪资达到${ind}行业期望，薪酬竞争力正常`);
-  else if (sr >= 0.8)  parts.push(`薪资低于${ind}行业期望 ${Math.round((1-sr)*100)}%，有一定提升空间`);
-  else                 parts.push(`薪资显著低于${ind}行业期望，是本次评估最大短板`);
 
-  if (r.stabilityC >= 1.25) parts.push(`${co}带来明显的稳定性溢价，隐性价值高`);
-  else if (r.stabilityC < 0.9) parts.push(`${co}的稳定性相对较低，存在一定职业风险`);
+  // 薪资维度（有趣，不含行业名）
+  if (sr >= 1.3)       parts.push(`薪资碾压同段位 ${Math.round((sr-1)*100)}%，这份工对你来说是洼地，继续挖`);
+  else if (sr >= 1.1)  parts.push(`薪资比同段位高 ${Math.round((sr-1)*100)}%，属于混得不错的那波人`);
+  else if (sr >= 1.0)  parts.push('薪资刚好踩在期望线上，不多不少，你就是"人均"本均');
+  else if (sr >= 0.85) parts.push(`薪资仅低于期望 ${Math.round((1-sr)*100)}%，就差那么一点，公司就是不给`);
+  else                 parts.push(`薪资比同段位低 ${Math.round((1-sr)*100)}%，你的工资让同行暗暗庆幸自己不是你`);
 
+  // 稳定性
+  if (r.stabilityC >= 1.25) parts.push('铁饭碗护身，下岗焦虑和你无缘，稳定是一种隐形涨薪');
+  else if (r.stabilityC < 0.9) parts.push('公司随时可能变小弓大，简历随时备好不吃亏');
+
+  // 加班+通勤（有趣）
   const timeIssues = [];
-  if (r.freedomC < 0.85) timeIssues.push(`${ot}严重压缩个人时间和精力`);
-  if (r.commuteC < 0.88) timeIssues.push(`${d.commuteMinutes}分钟单程通勤每年消耗大量时间`);
+  if (r.freedomC < 0.85) timeIssues.push(`加班买走了你的灵魂，不知道折算下来时薪算到几点`);
+  if (r.commuteC < 0.88) timeIssues.push(`每天通勤 ${d.commuteMinutes} 分钟，一年相当于 ${Math.round(d.commuteMinutes*2*250/60)} 小时都在路上飘`);
   if (timeIssues.length) parts.push(timeIssues.join('，'));
 
-  if (r.atmosphereC >= 1.12) parts.push('领导和同事质量高，工作体验好、精神损耗小');
-  else if (r.atmosphereC < 0.88) parts.push('工作氛围偏差，精神消耗不可忽视，长期影响健康');
+  // 氛围
+  if (r.atmosphereC >= 1.12) parts.push('领导靠谱同事给力，这年头比中彩票还难，别被挖走');
+  else if (r.atmosphereC < 0.88) parts.push('工作氛围堪忧，精神损耗才是最贵的隐形成本');
 
+  // 牛马等级总结
+  const seg = r.displayScore;
   const finals = [
-    [130,'综合评估处于极佳区间，是高性价比机会，珍惜当前。'],
-    [110,'综合评估超出期望，整体性价比良好，可以稳步发展。'],
-    [90, '综合评估基本符合期望，当前工作总体合理，可继续观察。'],
-    [70, '综合评估低于期望，建议制定改善计划，或留意外部机会。'],
-    [50, '综合评估明显低于期望，多个维度存在短板，需认真评估。'],
-    [0,  '综合评估较差，继续下去的机会成本较高，建议积极寻求改变。'],
+    [88, '综合来看你是高性价比打工人，工作回报率优秀，这份工不亏，暂时别乱动'],
+    [75, '综合来看你超过大多数同行，属于有点小幸运的那波打工人'],
+    [60, '综合来看你是标准牛马，不亏不赚，工作还行但也没啥惊喜'],
+    [48, '综合来看你在微亏，这份工作拿走的比给你的多，值得认真评估'],
+    [35, '综合来看你在明显亏损，多个维度在拖后腿，需要认真想想退出计划'],
+    [0,  '综合来看你是极品级牛马，性价比极低，要么快跑要么快涨，不然就卷死老板'],
   ];
-  parts.push(finals.find(([t]) => r.finalScore >= t)[1]);
+  parts.push(finals.find(([t]) => seg >= t)[1]);
   return parts.join('。');
 }
+
+
 
 // ---- 雷达图维度归一化 ----
 function radarVal(coef, min, max) { return Math.max(0, Math.min(1, (coef - min) / (max - min))); }
@@ -415,7 +422,7 @@ function radarVal(coef, min, max) { return Math.max(0, Math.min(1, (coef - min) 
 function renderResult() {
   const r = C.calculate(D);
   lastResult = r;
-  const lv = scoreLevel(r.finalScore);
+  const lv = scoreLevel(r.displayScore);  // 使用0-100的displayScore
   const analysis = genAnalysis(r, D);
 
   // 雷达图5维归一化（0-1）
