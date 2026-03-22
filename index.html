@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>测测你的工作值不值 | 工作性价比计算器</title>
+  <meta name="description" content="综合薪资、通勤、领导、公司稳定性、自由度五大维度，2分钟算出工作真实性价比，看你打败了多少同行业打工人。" />
+  <meta property="og:title" content="测测你的工作值不值" />
+  <meta property="og:description" content="五维度综合打分，看你打败了多少打工人" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- 背景装饰 -->
+  <div class="bg-noise"></div>
+
+  <!-- 主题切换 -->
+  <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="切换明暗主题">
+    <span id="theme-icon">☀️</span><span id="theme-label">浅色</span>
+  </button>
+
+  <div id="app">
+    <!-- 进度条 -->
+    <div id="prog" class="prog-wrap hidden"></div>
+
+    <!-- 首屏 -->
+    <div id="hero" class="card page">
+      <span class="hero-icon">💼</span>
+      <h1 class="hero-title">测测你的工作<br>到底值不值</h1>
+      <p class="hero-sub">
+        综合薪资、通勤、领导、公司稳定性、加班强度<br>
+        五维度打分，看你打败了多少同行业打工人 👊
+      </p>
+      <div class="badges">
+        <span class="badge">💰 税前换算</span>
+        <span class="badge">🏛️ 公司稳定性</span>
+        <span class="badge">⏰ 时间成本</span>
+        <span class="badge">🌟 领导氛围</span>
+        <span class="badge">📊 行业百分位</span>
+        <span class="badge">📷 生成分享图</span>
+      </div>
+      <button class="btn btn-p btn-lg btn-full" onclick="goTo(1)">开始测试 →</button>
+      <p class="hero-note">约 2 分钟完成 · 数据仅在本地计算，不上传任何服务器</p>
+    </div>
+
+    <!-- 步骤页 -->
+    <div id="s1" class="card page hidden"></div>
+    <div id="s2" class="card page hidden"></div>
+    <div id="s3" class="card page hidden"></div>
+    <div id="s4" class="card page hidden"></div>
+
+    <!-- 结果页 -->
+    <div id="result" class="card page hidden"></div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="calculator.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
